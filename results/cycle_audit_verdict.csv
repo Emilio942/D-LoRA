@@ -1,0 +1,14 @@
+candidate,separated,direction,spearman
+readout_norm,True,down,0.12993504870940792
+umci,False,-,0.04997501873438766
+lia,True,down,0.26986510116569334
+lcm_quad,False,-,0.32983512364695855
+cerlc,False,-,-0.2498750936719383
+ent_ratio,False,-,0.149925056203163
+entdiff_rot,False,-,-0.3098451161532035
+topspan,True,down,0.12993504870940792
+eig_align,False,-,-0.3498251311407136
+eig_mass,False,-,0.08995503372189778
+cni,False,-,0.029985011240632596
+pencil_gap,False,-,0.149925056203163
+downstream_sens,False,-,-0.42978516111573384
