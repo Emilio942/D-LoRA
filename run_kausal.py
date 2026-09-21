@@ -24,7 +24,7 @@ def load_by_name(name):
 
 
 @torch.no_grad()
-def forward_with_patch(model, layer_module, chunks, deltas, device, capture=None):
+def patched_logits(model, layer, chunks, deltas, device, capture=None):
     cap = {}
 
     def hook(module, inp, out):
@@ -44,6 +44,20 @@ def forward_with_patch(model, layer_module, chunks, deltas, device, capture=None
         logits = model(chunks).logits[:, -1, :].float()
     hand.remove()
     return logits, cap.get("h")
+
+
+def kl_stable(z0, z1):
+    """KL(p0 || p1) in float64, numerisch stabil (CE - H, zwei getrennte Summen).
+
+    Die naive Form sum(p0 * (l0 - l1)) leidet bei |logits| > ~300 unter
+    katastrophaler Ausloeschung ( Vorzeichen-Artefakte bis -1e7 ).
+    """
+    ls0 = z0.double() - torch.logsumexp(z0.double(), dim=-1, keepdim=True)
+    ls1 = z1.double() - torch.logsumexp(z1.double(), dim=-1, keepdim=True)
+    p0 = ls0.exp()
+    ce = -(p0 * ls1).sum(-1)
+    H = -(p0 * ls0).sum(-1)
+    return ce - H
 
 
 def solve_s(a, b, m, rho):
@@ -133,7 +147,7 @@ def main():
                 lc_sm = torch.log_softmax(lc, dim=1)
                 loc = torch.arange(end - start, device=lc_sm.device)
                 gidx = torch.arange(start, end, device=lc_sm.device)
-                res[nm]["kl"].append((lb_sm[gidx] * (lb_sm[gidx] - lc_sm)).sum(1).cpu())
+                res[nm]["kl"].append(kl_stable(lb[gidx], lc).cpu())
                 res[nm]["flip"].append((lc.argmax(1) != base_arg[gidx]).float().cpu())
                 res[nm]["logp"].append(lc_sm[loc, sel_targets.to(lc_sm.device)[gidx]].cpu())
         for nm in cond_names:

@@ -1,5 +1,17 @@
 # D-LoRA Abschlussbericht: Distanz zum Ziel & Trainings-Deployment (autonome Session II)
 
+> **⚠ KORREKTUR (v1.1, nach der Veröffentlichung):** Der folgende Bericht
+> wurde mit der numerisch defekten KL-Form (katastrophale Auslöschung bei
+> |Logits| ≈ 330) erstellt. Korrigiert mit stabiler KL (CE−H, float64):
+> (1) Alle absoluten KL-"Millionen" waren Artefakte (echte Werte: 0.5–24
+> nats). (2) Der kausale Kernbefund überlebt (L3: Kancellation schlimmer,
+> z +7.8..+10.6; L5: Dosis-Inversion, ±12). (3) Die LIA-Schwellen-Aussage
+> (σ_c ≈ 0.089, "Accuracy 1.000") ist **zurückgezogen** — bei stabiler KL
+> liegt Dosis 0.2 in ALLEN 30 Zellen im Attenuation-Regime; Rotation hilft
+> nur in Kegel-Layern bei ρ\* ≤ 0.1. (4) Trainings- und Synthetik-Resultate
+> (CE/MSE-Metriken) sind unverändert gültig. Details: README §3–§4,
+> `results/lia_matrix.csv` (regeneriert).
+
 ## Die Frage
 
 Wie nah sind wir am Ziel — dass der Adapter die Neutralisierung gegenseitig

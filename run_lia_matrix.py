@@ -101,10 +101,13 @@ def main():
                                            torch.stack(dC[dose]).to(device), device)
                 lrb, _ = forward_with_patch(model, lm[layer], sel,
                                             torch.stack(dB[dose]).to(device), device)
-                lc_sm = torch.log_softmax(lc.double(), dim=1)
-                lrb_sm = torch.log_softmax(lrb.double(), dim=1)
-                klC = (lb_sm[gid] * (lb_sm[gid] - lc_sm)).sum(1).mean().item()
-                klB = (lb_sm[gid] * (lb_sm[gid] - lrb_sm)).sum(1).mean().item()
+                ls0 = torch.log_softmax(lb.double(), dim=1)
+                lsC = torch.log_softmax(lc.double(), dim=1)
+                lsB = torch.log_softmax(lrb.double(), dim=1)
+                p0 = ls0.exp()[gid]
+                ls0k = ls0[gid]
+                klC = (-(p0 * lsC).sum(1) + (p0 * ls0k).sum(1)).mean().item()
+                klB = (-(p0 * lsB).sum(1) + (p0 * ls0k).sum(1)).mean().item()
                 row[f"klC_d{dose}"] = klC
                 row[f"klB_d{dose}"] = klB
                 row[f"ratio_d{dose}"] = klB / max(klC, 1.0)
